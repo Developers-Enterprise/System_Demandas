@@ -1,7 +1,13 @@
 /* ─────────────── DATA & SUPABASE INIT ─────────────── */
 // Insira aqui as credenciais do NOVO banco Supabase (ou outro BaaS) da nova prefeitura
-const SUPABASE_URL = 'SUA_NOVA_URL_AQUI';
-const SUPABASE_ANON_KEY = 'SUA_NOVA_CHAVE_AQUI';
+const SUPABASE_URL = 'https://xnvvhtkhspgcgejjlphl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhudnZodGtoc3BnY2dlampscGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyMTAyNjUsImV4cCI6MjEwNzc4NjI2NX0.MhjRSYRYYEWg_AbeOQXlVE4E_PZvqnISn1sOnGHtY5g';
+
+function toggleSidebar() {
+  const isClosed = document.body.classList.toggle('sidebar-closed');
+  const toggleButton = document.getElementById('sidebar-toggle');
+  if (toggleButton) toggleButton.setAttribute('aria-expanded', String(!isClosed));
+}
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
@@ -2011,7 +2017,7 @@ async function triggerStructuralReturn() {
   openDemandDetail(editingDemandId);
 }
 
-/* ─────────────── SIEDU v8 — MODELO OBRA > DEMANDAS ─────────────── */
+/* ─────────────── InfraGestor v8 — MODELO OBRA > DEMANDAS ─────────────── */
 let works = [];
 let currentWorkId = null;
 let editingWorkId = null;
@@ -3239,7 +3245,7 @@ printDemandDossier = function() {
     </head><body>
       <button onclick="window.print()" style="float:right;padding:8px 12px">Imprimir</button>
       <h1>${escapeHtml(demand.title)}</h1>
-      <div class="muted">Dossiê técnico gerado pela SIEDU em ${new Date().toLocaleDateString('pt-BR')}</div>
+      <div class="muted">Dossiê técnico gerado pela InfraGestor em ${new Date().toLocaleDateString('pt-BR')}</div>
       <div class="box">
         <div class="row"><span class="label">Pacote:</span> ${escapeHtml(rule.label)}</div>
         <div class="row"><span class="label">Responsáveis:</span> ${escapeHtml(getResponsibleDisplay(demand))}</div>

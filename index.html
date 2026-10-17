@@ -16,13 +16,13 @@
 <div id="screen-login" class="login-overlay">
   <div class="login-card">
     <div class="sidebar-logo login-brand" style="border:none; text-align:left; padding-bottom: 1.2rem;">
-      <div class="logo-mark">
-      <span class="brand-icon"><i class="fa-solid fa-helmet-safety"></i></span>
-      <div class="brand-copy">
-      <strong>InfraGestor</strong>
-      <span>Obras e Projetos</span>
-  </div>
-</div>
+      <div class="logo-mark login-logo-mark">
+        <span class="brand-icon"><i class="fa-solid fa-city" aria-hidden="true"></i></span>
+        <div class="brand-copy">
+          <strong>InfraGestor</strong>
+          <span>Obras e Projetos</span>
+        </div>
+      </div>
 <div class="logo-sub">Município Exemplo · Gestão de Obras</div>
     </div>
     <div class="login-intro">
@@ -60,11 +60,11 @@
       <div class="logo-mark">
         <span class="brand-icon"><i class="fa-solid fa-key"></i></span>
         <div class="brand-copy">
-          <strong>SIEDU</strong>
+          <strong>InfraGestor</strong>
           <span>Painel de Obras</span>
         </div>
       </div>
-      <div class="logo-sub">Prefeitura de Mamanguape · SIEDU</div>
+      <div class="logo-sub">Município Exemplo · InfraGestor</div>
     </div>
     <div class="login-intro">
       <h1>Criar nova senha</h1>
@@ -94,28 +94,16 @@
     <div class="logo-mark">
       <span class="brand-icon"><i class="fa-solid fa-city"></i></span>
       <div class="brand-copy">
-        <strong>SIEDU</strong>
+        <strong>InfraGestor</strong>
         <span>Painel de Obras</span>
       </div>
     </div>
-    <div class="logo-sub">Prefeitura de Mamanguape · SIEDU</div>
+    <div class="logo-sub">Município Exemplo · InfraGestor</div>
   </div>
-  <div class="sidebar-profile">
-    <div class="profile-avatar avatar-admin" id="sb-avatar">AA</div>
-    <div class="profile-info">
-      <div class="profile-name" id="sb-name"></div>
-      <div class="profile-role" id="sb-role"></div>
-    </div>
-    <span class="profile-badge badge-admin" id="sb-badge">Gestão</span>
-  </div>
-
   <nav class="sidebar-nav" id="sb-nav-admin">
     <div class="nav-section-label">Principal</div>
     <div class="nav-item" onclick="showScreen('works-dashboard', this)">
       <i class="fa-solid fa-building-circle-check"></i> Obras
-    </div>
-    <div class="nav-item admin-only" onclick="resetWorkFormMode();showScreen('create-work', this)">
-      <i class="fa-solid fa-square-plus"></i> Nova Obra
     </div>
     <div class="nav-item admin-only" onclick="showScreen('admin-dashboard', this)">
       <i class="fa-solid fa-chart-pie"></i> Demandas
@@ -125,9 +113,6 @@
     </div>
     <div class="nav-item admin-only" onclick="showScreen('work-progress', this)">
       <i class="fa-solid fa-diagram-project"></i> Fluxo
-    </div>
-    <div class="nav-item admin-only" onclick="resetDemandFormMode();showScreen('create-demand', this)">
-      <i class="fa-solid fa-plus-circle"></i> Nova Demanda
     </div>
     <div class="nav-item admin-only" onclick="showScreen('admin-team', this)">
       <i class="fa-solid fa-users"></i> Equipe Técnica
@@ -139,21 +124,27 @@
       <i class="fa-solid fa-eye"></i> Visão do Prefeito
     </div>
     <div class="nav-section-label" style="margin-top:8px">Consulta</div>
-  </nav>
-
-  <div class="sidebar-footer" style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--border);">
-    <button class="btn btn-ghost btn-sm" style="width:100%; border:none;" onclick="handleLogout()">
+    <div class="nav-item logout-nav-item" onclick="handleLogout()">
       <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
-    </button>
+    </div>
+  </nav>
+  <div class="sidebar-footer-illustration" aria-hidden="true">
+    <svg viewBox="0 0 240 92" focusable="false">
+      <path d="M8 78h224M18 78V43h31v35m8 0V28h39v50m9 0V48h28v30m8 0V18h42v60m10 0V38h29v40" />
+      <path d="M10 68h220M20 68l18-24 18 24m6 0 23-32 23 32m39 0 22-29 22 29m11 0 17-23 17 23" />
+      <path d="M105 78c5-18 13-27 25-27s20 9 25 27M96 78h68M117 58v20m26-20v20" />
+      <path d="M25 49h16m22-14h28m51-8h31m15 15h20" />
+    </svg>
   </div>
 </aside>
 
 <!--- TOPBAR --->
 <div class="main" style="display:none;">
 <div class="topbar">
+  <button class="btn-icon sidebar-toggle" id="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="Abrir ou fechar menu lateral" aria-expanded="true"><i class="fa-solid fa-bars"></i></button>
   <div class="topbar-title" id="topbar-title">Painel de Obras <span id="topbar-sub">Secretaria de Infraestrutura</span></div>
   <div class="topbar-actions">
-    <button class="btn btn-ghost btn-sm siedu-command-btn" type="button" data-open-command>
+    <button class="btn btn-ghost btn-sm infra-command-btn" type="button" data-open-command>
       <i class="fa-solid fa-magnifying-glass"></i> Buscar
       <span>Ctrl K</span>
     </button>
@@ -163,9 +154,11 @@
       </button>
       <div class="tooltip-content">Central de Alertas</div>
     </div>
-    <button class="btn btn-primary admin-only" onclick="resetDemandFormMode();showScreen('create-demand')">
-      <i class="fa-solid fa-plus"></i> Nova Demanda
-    </button>
+    <div class="sidebar-profile topbar-profile">
+      <div class="profile-avatar avatar-admin" id="sb-avatar">AA</div>
+      <div class="profile-info"><div class="profile-name" id="sb-name"></div><div class="profile-role" id="sb-role"></div></div>
+      <span class="profile-badge badge-admin" id="sb-badge">Gestão</span>
+    </div>
   </div>
 </div>
 
@@ -189,26 +182,19 @@
 ═══════════════════════════════════════════ --->
 <div class="screen active" id="screen-admin-dashboard">
 
-  <div class="screen-hero">
-    <div class="hero-copy">
-      <span class="hero-kicker">Prefeitura de Mamanguape · SIEDU</span>
-      <h1>Painel de Demandas do Setor de Obras</h1>
-      <p>Acompanhamento técnico das demandas, da abertura ao fechamento documental.</p>
-      <div class="hero-tags">
-        <span><i class="fa-solid fa-file-circle-check"></i> DFD e ETP</span>
-        <span><i class="fa-solid fa-compass-drafting"></i> Projetos técnicos</span>
-        <span><i class="fa-solid fa-database"></i> Arquivos da demanda</span>
-      </div>
+  <div class="screen-hero dashboard-white-label" style="background: #eef2ff; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 24px; position: relative; overflow: hidden; border: 1px solid var(--infra-border);">
+    <div style="background: var(--infra-primary); width: 80px; height: 80px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+      <i class="fa-solid fa-helmet-safety" style="font-size: 36px; color: #ffffff;"></i>
     </div>
-    <div class="hero-sidecard">
-      <div class="hero-sideitem">
-        <span class="hero-side-label">Fluxo</span>
-        <strong>DFD/ETP → Arquitetura → Engenharia → Orçamento</strong>
-      </div>
-      <div class="hero-sideitem">
-        <span class="hero-side-label">Operação</span>
-        <strong>Chefia abre a demanda. Técnicos alimentam os anexos.</strong>
-      </div>
+    <div style="z-index: 1;">
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--infra-primary-2); text-transform: uppercase; letter-spacing: 0.5px;">MUNICÍPIO EXEMPLO • GESTÃO DE OBRAS</span>
+      <h1 style="color: var(--infra-primary); font-size: 1.75rem; margin: 4px 0 8px 0; font-weight: 800;">Painel de Demandas do Setor de Obras</h1>
+      <p style="color: #475569; margin: 0; font-size: 0.95rem; max-width: 600px;">Acompanhamento técnico das demandas de abertura e fechamento de documentos e demandas técnicas.</p>
+    </div>
+    <div style="margin-left: auto; z-index: 1;">
+      <button class="btn btn-primary" onclick="resetDemandFormMode();showScreen('create-demand')" style="display: flex; gap: 8px; align-items: center; border-radius: 8px; padding: 10px 20px;">
+        <i class="fa-solid fa-plus-circle" style="color: #facc15;"></i> Nova Demanda
+      </button>
     </div>
   </div>
 
@@ -325,12 +311,13 @@
      PAINEL DE OBRAS — MODELO OBRA > DEMANDAS
 ═══════════════════════════════════════════ -->
 <div class="screen" id="screen-works-dashboard">
-  <div class="screen-hero compact siedu-work-hero">
+  <div class="screen-hero compact infra-work-hero">
     <div class="hero-copy">
       <span class="hero-kicker">Fluxo por obra</span>
       <h1>Painel de Obras</h1>
       <p>Cada obra reúne suas demandas, responsáveis, etapas e documentos técnicos. O responsável da próxima etapa acompanha o que já foi produzido sem acessar obras que não fazem parte do seu fluxo.</p>
     </div>
+    <button class="btn btn-primary admin-only" onclick="resetWorkFormMode();showScreen('create-work')"><i class="fa-solid fa-plus"></i> Nova Obra</button>
   </div>
 
   <div class="stat-grid obras-stat-grid">
@@ -353,7 +340,6 @@
           <option value="Aguardando">Aguardando</option>
           <option value="Concluída">Concluída</option>
         </select>
-        <button class="btn btn-primary admin-only" onclick="resetWorkFormMode();showScreen('create-work')"><i class="fa-solid fa-plus"></i> Nova Obra</button>
       </div>
     </div>
   </div>
@@ -376,7 +362,7 @@
         <h1>Nova obra</h1>
         <p>Cadastre a obra uma única vez. Depois, abra as demandas técnicas dentro dela.</p>
       </div>
-      <div class="hero-sidecard mini"><div class="hero-sideitem"><span class="hero-side-label">Modelo</span><strong>Obra principal → demandas por etapa → anexos técnicos.</strong></div></div>
+      <div class="hero-sidecard mini model-contrast"><div class="hero-sideitem"><span class="hero-side-label">Modelo</span><strong>Obra principal → demandas por etapa → anexos técnicos.</strong></div></div>
     </div>
 
     <div class="form-section hero-form-section">
@@ -915,6 +901,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="interatvdd.js"></script>
-<script src="siedu-ui.js"></script>
+<script src="infra-ui.js"></script>
 </body>
 </html>
