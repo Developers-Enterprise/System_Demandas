@@ -2499,6 +2499,33 @@ body[data-theme="infra-modern"] .infra-work-hero .hero-copy { flex: 1; }
   }
 }
 
+/* A marca do login fica sobre um cartão claro, fora do tratamento escuro da sidebar. */
+body[data-theme="infra-modern"] #screen-login .login-logo-mark .brand-icon {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 16px !important;
+  background: rgba(6, 78, 59, 0.1) !important;
+  border: 1px solid rgba(6, 78, 59, 0.18) !important;
+  color: #064e3b !important;
+  box-shadow: none !important;
+}
+body[data-theme="infra-modern"] #screen-login .login-logo-mark .brand-icon svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body[data-theme="infra-modern"] #screen-login .login-logo-mark .brand-copy strong {
+  color: #064e3b !important;
+}
+body[data-theme="infra-modern"] #screen-login .login-logo-mark .brand-copy span {
+  color: #64748b !important;
+}
+
 /* Topbar e Hero (Cabeçalho da tela) */
 body[data-theme="infra-modern"] .topbar { background: #ffffff; border-bottom: 1px solid var(--infra-border); }
 body[data-theme="infra-modern"] .topbar-title { color: var(--infra-primary); }
