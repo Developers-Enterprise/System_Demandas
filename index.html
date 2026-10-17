@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b188e">
+<title>InfraGestor — Gestão de Demandas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body class="is-logged-out" data-theme="infra-modern">
+
+<!-- LOGIN SCREEN -->
+<div id="screen-login" class="login-overlay">
+  <div class="login-card">
+    <div class="sidebar-logo login-brand" style="border:none; text-align:left; padding-bottom: 1.2rem;">
+      <div class="logo-mark">
+      <span class="brand-icon"><i class="fa-solid fa-helmet-safety"></i></span>
+      <div class="brand-copy">
+      <strong>InfraGestor</strong>
+      <span>Obras e Projetos</span>
+  </div>
+</div>
+<div class="logo-sub">Município Exemplo · Gestão de Obras</div>
+    </div>
+    <div class="login-intro">
+      <h1>Gestão técnica de demandas</h1>
+      <p>Projetos, prazos, responsáveis e anexos técnicos em um único ambiente.</p>
+    </div>
+    
+    <form id="form-login">
+      <div class="form-group">
+        <label class="form-label">Usuário</label>
+        <input type="email" id="login-user" class="form-input" placeholder="Seu e-mail de login..." required>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-label">Senha</label>
+        <div class="password-container">
+          <input type="password" id="login-pass" class="form-input" placeholder="••••••" required>
+          <i class="fa-solid fa-eye" id="toggle-password-icon" onclick="togglePasswordVisibility()"></i>
+        </div>
+        <div style="text-align: center; margin-top: 6px;">
+          <a href="#" onclick="recuperarSenha()" style="font-size: 0.80rem; color: var(--accent); text-decoration: none; font-weight: 800;">Alterar minha senha</a>
+        </div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 2rem; justify-content: center;">Acessar Sistema</button>
+    </form>
+    
+    <p id="login-error" style="color:var(--status-red); font-size:0.75rem; margin-top:1rem; text-align:center; display:none;">Credenciais inválidas.</p>
+  </div>
+</div>
+
+<!-- RESET PASSWORD SCREEN — exibida somente quando o usuário volta do e-mail de confirmação -->
+<div id="screen-reset-password" class="login-overlay" style="display:none;">
+  <div class="login-card">
+    <div class="sidebar-logo login-brand" style="border:none; text-align:left; padding-bottom: 1.2rem;">
+      <div class="logo-mark">
+        <span class="brand-icon"><i class="fa-solid fa-key"></i></span>
+        <div class="brand-copy">
+          <strong>SIEDU</strong>
+          <span>Painel de Obras</span>
+        </div>
+      </div>
+      <div class="logo-sub">Prefeitura de Mamanguape · SIEDU</div>
+    </div>
+    <div class="login-intro">
+      <h1>Criar nova senha</h1>
+      <p>Confirmação de e-mail validada. Defina sua nova senha de acesso abaixo.</p>
+    </div>
+
+    <form id="form-reset-password" onsubmit="event.preventDefault(); salvarNovaSenha();">
+      <div class="form-group">
+        <label class="form-label">Nova senha</label>
+        <input type="password" id="reset-nova-senha" class="form-input" placeholder="••••••" required minlength="6">
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-label">Repita a nova senha</label>
+        <input type="password" id="reset-confirma-senha" class="form-input" placeholder="••••••" required minlength="6">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 2rem; justify-content: center;">Salvar nova senha</button>
+    </form>
+
+    <p id="reset-password-error" style="color:var(--status-red); font-size:0.75rem; margin-top:1rem; text-align:center; display:none;"></p>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" style="display:none;">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <span class="brand-icon"><i class="fa-solid fa-city"></i></span>
+      <div class="brand-copy">
+        <strong>SIEDU</strong>
+        <span>Painel de Obras</span>
+      </div>
+    </div>
+    <div class="logo-sub">Prefeitura de Mamanguape · SIEDU</div>
+  </div>
+  <div class="sidebar-profile">
+    <div class="profile-avatar avatar-admin" id="sb-avatar">AA</div>
+    <div class="profile-info">
+      <div class="profile-name" id="sb-name"></div>
+      <div class="profile-role" id="sb-role"></div>
+    </div>
+    <span class="profile-badge badge-admin" id="sb-badge">Gestão</span>
+  </div>
+
+  <nav class="sidebar-nav" id="sb-nav-admin">
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item" onclick="showScreen('works-dashboard', this)">
+      <i class="fa-solid fa-building-circle-check"></i> Obras
+    </div>
+    <div class="nav-item admin-only" onclick="resetWorkFormMode();showScreen('create-work', this)">
+      <i class="fa-solid fa-square-plus"></i> Nova Obra
+    </div>
+    <div class="nav-item admin-only" onclick="showScreen('admin-dashboard', this)">
+      <i class="fa-solid fa-chart-pie"></i> Demandas
+    </div>
+    <div class="nav-item admin-only" onclick="showScreen('admin-kanban', this)">
+      <i class="fa-solid fa-table-columns"></i> Em Projeto
+    </div>
+    <div class="nav-item admin-only" onclick="showScreen('work-progress', this)">
+      <i class="fa-solid fa-diagram-project"></i> Fluxo
+    </div>
+    <div class="nav-item admin-only" onclick="resetDemandFormMode();showScreen('create-demand', this)">
+      <i class="fa-solid fa-plus-circle"></i> Nova Demanda
+    </div>
+    <div class="nav-item admin-only" onclick="showScreen('admin-team', this)">
+      <i class="fa-solid fa-users"></i> Equipe Técnica
+    </div>
+    <div class="nav-item colab-only" onclick="showScreen('colab-dashboard', this)">
+      <i class="fa-solid fa-user-hard-hat"></i> Minhas Demandas
+    </div>
+    <div class="nav-item prefeito-only" onclick="showScreen('works-dashboard', this)">
+      <i class="fa-solid fa-eye"></i> Visão do Prefeito
+    </div>
+    <div class="nav-section-label" style="margin-top:8px">Consulta</div>
+  </nav>
+
+  <div class="sidebar-footer" style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--border);">
+    <button class="btn btn-ghost btn-sm" style="width:100%; border:none;" onclick="handleLogout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
+    </button>
+  </div>
+</aside>
+
+<!--- TOPBAR --->
+<div class="main" style="display:none;">
+<div class="topbar">
+  <div class="topbar-title" id="topbar-title">Painel de Obras <span id="topbar-sub">Secretaria de Infraestrutura</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm siedu-command-btn" type="button" data-open-command>
+      <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      <span>Ctrl K</span>
+    </button>
+    <div class="tooltip-wrap">
+      <button class="btn-icon" onclick="toggleNotif()"><i class="fa-solid fa-bell"></i>
+        <span id="notif-badge" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--status-red);border-radius:50%;display:none;"></span>
+      </button>
+      <div class="tooltip-content">Central de Alertas</div>
+    </div>
+    <button class="btn btn-primary admin-only" onclick="resetDemandFormMode();showScreen('create-demand')">
+      <i class="fa-solid fa-plus"></i> Nova Demanda
+    </button>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <h3><i class="fa-solid fa-bell" style="color:var(--accent);margin-right:6px"></i>Central de Alertas</h3>
+    <button class="btn-icon btn-sm" onclick="toggleNotif()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="notif-list">
+    <p style="color:var(--text3); font-size: 0.8rem; font-style: italic; padding: 10px 1.25rem;">Nenhum alerta recente.</p>
+  </div>
+</div>
+
+<!-- PAGES -->
+<div class="page-content">
+
+<!-- ═══════════════════════════════════════════
+     TELA 1 — DASHBOARD ADMIN
+═══════════════════════════════════════════ --->
+<div class="screen active" id="screen-admin-dashboard">
+
+  <div class="screen-hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Prefeitura de Mamanguape · SIEDU</span>
+      <h1>Painel de Demandas do Setor de Obras</h1>
+      <p>Acompanhamento técnico das demandas, da abertura ao fechamento documental.</p>
+      <div class="hero-tags">
+        <span><i class="fa-solid fa-file-circle-check"></i> DFD e ETP</span>
+        <span><i class="fa-solid fa-compass-drafting"></i> Projetos técnicos</span>
+        <span><i class="fa-solid fa-database"></i> Arquivos da demanda</span>
+      </div>
+    </div>
+    <div class="hero-sidecard">
+      <div class="hero-sideitem">
+        <span class="hero-side-label">Fluxo</span>
+        <strong>DFD/ETP → Arquitetura → Engenharia → Orçamento</strong>
+      </div>
+      <div class="hero-sideitem">
+        <span class="hero-side-label">Operação</span>
+        <strong>Chefia abre a demanda. Técnicos alimentam os anexos.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card blue">
+      <i class="fa-solid fa-folder-open stat-icon"></i>
+      <div class="stat-number" id="stat-total">0</div>
+      <div class="stat-label">Total de Demandas Ativas</div>
+    </div>
+    <div class="stat-card red">
+      <i class="fa-solid fa-circle-exclamation stat-icon"></i>
+      <div class="stat-number" id="stat-atrasadas">0</div>
+      <div class="stat-label">Demandas Atrasadas</div>
+    </div>
+    <div class="stat-card yellow">
+      <i class="fa-solid fa-hourglass stat-icon"></i>
+      <div class="stat-number" id="stat-pendentes">0</div>
+      <div class="stat-label">Em Execução</div>
+    </div>
+    <div class="stat-card green">
+      <i class="fa-solid fa-circle-check stat-icon"></i>
+      <div class="stat-number" id="stat-concluidas">0</div>
+      <div class="stat-label">Concluídas</div>
+    </div>
+    <div class="stat-card orange">
+      <i class="fa-solid fa-triangle-exclamation stat-icon"></i>
+      <div class="stat-number" id="stat-72h">0</div>
+      <div class="stat-label">⚠ Vencendo em 72h</div>
+    </div>
+    <div class="stat-card purple">
+      <i class="fa-solid fa-pause-circle stat-icon"></i>
+      <div class="stat-number" id="stat-aguardando">0</div>
+      <div class="stat-label">Aguardando Terceiros</div>
+    </div>
+  </div>
+
+  <div class="alert-banner" id="admin-alert-banner" style="display: none;">
+    <i class="fa-solid fa-bell alert-icon" style="animation: pulse-color 1s infinite;"></i>
+    <div class="alert-text" id="admin-alert-content">
+      </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Todas as Demandas <span class="section-count" id="admin-demand-count"></span></div>
+    <div class="section-actions">
+      <div class="filter-bar" style="margin-bottom:0">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="filter-input" placeholder="Buscar demandas…" id="search-all" oninput="filterTable()">
+        </div>
+        <select class="filter-select" id="filter-status" onchange="filterTable()">
+          <option value="">Todos os Status</option>
+          <option value="Triagem">⚪ Triagem</option>
+          <option value="DFD/ETP">🔵 DFD/ETP</option>
+          <option value="Arquitetura">🟣 Arquitetura</option>
+          <option value="Engenharia">🟡 Engenharia</option>
+          <option value="Orçamento">🟠 Orçamento</option>
+          <option value="Termo/Riscos">📄 Termo/Riscos</option>
+          <option value="Pendente">🟡 Pendente</option>
+          <option value="Em Revisão">🔵 Em Revisão</option>
+          <option value="Correção">🟠 Correção</option>
+          <option value="Aguardando">🟣 Aguardando Terceiros</option>
+          <option value="Concluído">✅ Concluído</option>
+          <option value="Atrasado">🔴 Atrasado</option>
+        </select>
+        <select class="filter-select" id="filter-esp" onchange="filterTable()">
+          <option value="">Todas as Especialidades</option>
+          <option value="Proposta do Projeto">Arquitetura — Apresentação da Proposta do Projeto</option>
+          <option value="Projeto de Ponte">Engenharia — Projeto de Ponte</option>      
+          <option value="DFD">DFD</option>
+          <option value="ETP">ETP</option>
+          <option value="DFD/ETP">DFD + ETP</option>
+          <option value="Arquitetônico">Arquitetônico</option>
+          <option value="Estrutural">Estrutural</option>
+          <option value="Elétrico">Elétrico</option>
+          <option value="Hidrossanitário">Hidrossanitário</option>
+          <option value="Drenagem">Drenagem Pluvial</option>
+          <option value="Pavimentação">Pavimentação</option>
+          <option value="Passagem Molhada">Passagem Molhada</option>
+          <option value="SPDA">SPDA</option>
+          <option value="PCI">PCI</option>
+          <option value="Orçamento">Orçamento</option>
+          <option value="Termo">Termo de Referência</option>
+          <option value="Matriz">Matriz de Riscos</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-card">
+    <div class="demand-table-wrap">
+      <table class="demand-table" id="main-table">
+        <thead>
+          <tr>
+            <th>PROJETO / DEMANDA</th>
+            <th>ESPECIALIDADE</th>
+            <th>RESPONSÁVEL</th>
+            <th>PRAZO</th>
+            <th>STATUS</th>
+            <th>DRIVE</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PAINEL DE OBRAS — MODELO OBRA > DEMANDAS
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-works-dashboard">
+  <div class="screen-hero compact siedu-work-hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Fluxo por obra</span>
+      <h1>Painel de Obras</h1>
+      <p>Cada obra reúne suas demandas, responsáveis, etapas e documentos técnicos. O responsável da próxima etapa acompanha o que já foi produzido sem acessar obras que não fazem parte do seu fluxo.</p>
+    </div>
+  </div>
+
+  <div class="stat-grid obras-stat-grid">
+    <div class="stat-card purple"><i class="fa-solid fa-building-circle-check stat-icon"></i><div class="stat-number" id="work-stat-total">0</div><div class="stat-label">Obras visíveis</div></div>
+    <div class="stat-card yellow"><i class="fa-solid fa-person-digging stat-icon"></i><div class="stat-number" id="work-stat-demandas">0</div><div class="stat-label">Demandas técnicas</div></div>
+    <div class="stat-card green"><i class="fa-solid fa-file-circle-check stat-icon"></i><div class="stat-number" id="work-stat-docs">0%</div><div class="stat-label">Documentação média</div></div>
+    <div class="stat-card red"><i class="fa-solid fa-clock stat-icon"></i><div class="stat-number" id="work-stat-alertas">0</div><div class="stat-label">Prazos críticos</div></div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Obras cadastradas <span class="section-count" id="works-count">0 registros</span></div>
+    <div class="section-actions">
+      <div class="filter-bar" style="margin-bottom:0">
+        <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" class="filter-input" placeholder="Buscar obra, bairro ou processo…" id="search-works" oninput="renderWorksDashboard()"></div>
+        <select class="filter-select" id="filter-work-status" onchange="renderWorksDashboard()">
+          <option value="">Todos os status</option>
+          <option value="Em planejamento">Em planejamento</option>
+          <option value="Em projeto">Em projeto</option>
+          <option value="Em orçamento">Em orçamento</option>
+          <option value="Aguardando">Aguardando</option>
+          <option value="Concluída">Concluída</option>
+        </select>
+        <button class="btn btn-primary admin-only" onclick="resetWorkFormMode();showScreen('create-work')"><i class="fa-solid fa-plus"></i> Nova Obra</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-card">
+    <div class="demand-table-wrap">
+      <table class="demand-table works-table">
+        <thead><tr><th>OBRA</th><th>BAIRRO/LOCAL</th><th>DEMANDAS</th><th>DOCUMENTOS</th><th>RESPONSÁVEIS</th><th>STATUS</th><th></th></tr></thead>
+        <tbody id="works-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-create-work">
+  <div class="form-wrap wide-form">
+    <div class="screen-hero compact">
+      <div class="hero-copy">
+        <span class="hero-kicker">Cadastro da obra</span>
+        <h1>Nova obra</h1>
+        <p>Cadastre a obra uma única vez. Depois, abra as demandas técnicas dentro dela.</p>
+      </div>
+      <div class="hero-sidecard mini"><div class="hero-sideitem"><span class="hero-side-label">Modelo</span><strong>Obra principal → demandas por etapa → anexos técnicos.</strong></div></div>
+    </div>
+
+    <div class="form-section hero-form-section">
+      <div class="form-section-title"><i class="fa-solid fa-building-circle-check"></i>Dados da obra</div>
+      <div class="form-grid form-grid-3">
+        <div class="form-group full"><label class="form-label">Nome da obra <span class="required">*</span></label><input type="text" id="new-work-title" class="form-input" placeholder="Ex: Reforma da UBS Centro"><span class="form-error-message" id="error-new-work-title"></span></div>
+        <div class="form-group"><label class="form-label">Bairro / localidade</label><input type="text" id="new-work-bairro" class="form-input" placeholder="Ex: Centro, Areal, Zona Rural…"></div>
+        <div class="form-group"><label class="form-label">Processo / protocolo</label><input type="text" id="new-work-processo" class="form-input" placeholder="Ex: 012/2026"></div>
+        <div class="form-group"><label class="form-label">Status inicial</label><select class="form-select" id="new-work-status"><option>Em planejamento</option><option>Em projeto</option><option>Em orçamento</option><option>Aguardando</option></select></div>
+        <div class="form-group"><label class="form-label">Prioridade</label><select class="form-select" id="new-work-prioridade"><option>Normal</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select></div>
+        <div class="form-group"><label class="form-label">Prazo previsto</label><input type="date" id="new-work-prazo" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Valor previsto/estimado</label><input type="text" id="obra-valor" class="form-input" placeholder="R$ 0,00"></div>
+        <div class="form-group full"><label class="form-label">Objeto da obra</label><textarea id="new-work-objeto" class="form-textarea" placeholder="Descreva o objeto da obra e a finalidade do serviço…"></textarea></div>
+        <div class="form-group full"><label class="form-label">Observações internas</label><textarea id="new-work-obs" class="form-textarea" placeholder="Informações de gestão, origem da solicitação, convênio/emenda ou pontos de atenção…"></textarea></div>
+      </div>
+    </div>
+
+    <div class="form-actions sticky-actions"><button class="btn btn-ghost" onclick="resetWorkFormMode();showScreen('works-dashboard')"><i class="fa-solid fa-xmark"></i> Cancelar</button><button class="btn btn-primary" id="save-work-btn" onclick="saveWork()"><i class="fa-solid fa-floppy-disk"></i> Cadastrar Obra</button></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-work-detail">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="showScreen('works-dashboard')"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+    <h2 id="work-detail-title" style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;flex:1">--</h2>
+    <span id="work-detail-status" class="status-badge s-purple">--</span>
+    <button class="btn btn-ghost btn-sm admin-only" id="work-detail-edit"><i class="fa-solid fa-pen-to-square"></i> Editar obra</button>
+    <button class="btn btn-primary btn-sm admin-only" id="work-detail-new-demand"><i class="fa-solid fa-plus"></i> Nova demanda nesta obra</button>
+  </div>
+
+  <div class="obra-flow-banner">
+    <div><span>Fluxo da obra</span><strong id="work-detail-flow">DFD/ETP → Arquitetura → Engenharia → Orçamento → TR/Matriz</strong></div>
+    <div><span>Responsáveis envolvidos</span><strong id="work-detail-team">--</strong></div>
+  </div>
+
+  <div class="detail-wrap">
+    <div class="detail-main">
+      <div class="detail-card">
+        <div class="detail-card-header"><i class="fa-solid fa-circle-info" style="color:var(--accent)"></i><h3>Resumo da obra</h3></div>
+        <div class="detail-card-body" id="work-detail-summary"></div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i><h3>Demandas da obra</h3></div>
+        <div class="detail-card-body"><div id="work-demands-list" class="work-demand-list"></div></div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header"><i class="fa-solid fa-folder-tree" style="color:var(--accent)"></i><h3>Documentos anexados na obra</h3></div>
+        <div class="detail-card-body"><div id="work-documents-list" class="work-documents-list"></div></div>
+      </div>
+    </div>
+    <div class="detail-sidebar-col">
+      <div class="detail-card"><div class="detail-card-header"><i class="fa-solid fa-timeline" style="color:var(--accent)"></i><h3>Linha do tempo</h3></div><div class="detail-card-body" id="work-timeline-list"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-admin-team">
+  <div class="section-header">
+    <div class="section-title">Gestão de Equipe Técnica <span class="section-count">Visão Admin</span></div>
+  </div>
+
+  <div class="alert-banner" style="background: rgba(108,141,250,0.08); border-color: rgba(108,141,250,0.25);">
+    <i class="fa-solid fa-circle-info alert-icon" style="color: var(--accent)"></i>
+    <div class="alert-text">
+      Selecione um profissional abaixo para isolar e supervisionar todas as suas demandas ativas no Dashboard.
+    </div>
+  </div>
+
+  <h3 style="font-size: 0.85rem; color: var(--text2); margin: 1.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;">
+    <i class="fa-solid fa-helmet-safety" style="margin-right: 6px;"></i> Engenharia
+  </h3>
+  <div class="stat-grid" id="team-grid-eng">
+    </div>
+
+  <h3 style="font-size: 0.85rem; color: var(--text2); margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;">
+    <i class="fa-solid fa-compass-drafting" style="margin-right: 6px;"></i> Arquitetura
+  </h3>
+  <div class="stat-grid" id="team-grid-arq">
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KANBAN
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-admin-kanban">
+  <div class="section-header">
+    <div class="section-title">Visão Kanban</div>
+  </div>
+  <div class="kanban-wrap" id="kanban-board"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TELA - ACOMPANHAMENTO DE FLUXO (NOVA)
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-work-progress">
+  <div class="section-header">
+    <div class="section-title">Acompanhamento de Fluxo <span class="section-count">Visão Admin</span></div>
+  </div>
+  <div id="progress-container" class="progress-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TELA 3 — CRIAR DEMANDA REMODELADA
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-create-demand">
+  <div class="form-wrap wide-form">
+    <div class="screen-hero compact">
+      <div class="hero-copy">
+        <span class="hero-kicker">Cadastro de demanda</span>
+        <h1>Nova demanda técnica</h1>
+        <p>Preencha os dados da solicitação, defina responsáveis e acompanhe os anexos por categoria.</p>
+      </div>
+      <div class="hero-sidecard mini">
+        <div class="hero-sideitem">
+          <span class="hero-side-label">Importante</span>
+          <strong>DFD e ETP aparecem primeiro.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section hero-form-section">
+      <div class="form-section-title"><i class="fa-solid fa-helmet-safety"></i>Abertura da Demanda Técnica</div>
+      <div class="form-grid form-grid-3">
+        <div class="form-group full">
+          <label class="form-label">Título da Demanda <span class="required">*</span></label>
+          <input type="text" id="new-demand-title" class="form-input" placeholder="Ex: Reforma da UBS Centro — pacote completo de projetos">
+          <span class="form-error-message" id="error-new-demand-title"></span>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Obra vinculada <span class="required">*</span></label>
+          <select class="form-select js-smart-select" id="new-demand-work">
+            <option value="">Selecione a obra antes de criar a demanda…</option>
+          </select>
+          <span class="form-hint">Cada demanda deve pertencer a uma obra. Assim, o próximo responsável enxerga o histórico e os documentos da obra.</span>
+          <span class="form-error-message" id="error-new-demand-work"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoria Principal da Demanda <span class="required">*</span></label>
+          <select class="form-select js-smart-select" id="new-demand-esp" onchange="renderNewDemandPackagePreview()">
+            <option value="">Selecionar…</option>
+            <option value="Proposta do Projeto">Arquitetura — Apresentação da Proposta do Projeto</option>
+            <option value="DFD">DFD — Engenharia/Arquitetura</option>
+            <option value="ETP">ETP — Engenharia/Arquitetura</option>
+            <option value="DFD/ETP">DFD + ETP — Engenharia/Arquitetura</option>
+            <option value="Obra Completa">Obra Completa — Arquitetura + Engenharias + Orçamento</option>
+            <option value="Arquitetônico">Arquitetura — Projeto Arquitetônico</option>
+            <option value="Estrutural">Engenharia — Projeto Estrutural</option>
+            <option value="Elétrico">Engenharia — Projeto Elétrico</option>
+            <option value="Hidrossanitário">Engenharia — Projeto Hidrossanitário</option>
+            <option value="Drenagem">Engenharia — Projeto de Drenagem Pluvial</option>
+            <option value="Pavimentação">Pavimentação </option>
+            <option value="Passagem Molhada">Engenharia — Projeto de Passagem Molhada</option>
+            <option value="SPDA">Engenharia — SPDA</option>
+            <option value="PCI">Engenharia — PCI</option>
+            <option value="Orçamento">Engenharia — Orçamento</option>
+            <option value="Termo de Referência">Engenharia — Termo de Referência</option>
+            <option value="Matriz de Riscos">Engenharia — Matriz de Riscos</option>
+            <option value="Revisão de Projetos">Engenharia — Revisão de Projetos</option>
+            <option value="SUDEMA">SUDEMA</option>
+          </select>
+          <span class="form-error-message" id="error-new-demand-esp"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select class="form-select" id="new-demand-prioridade">
+            <option value="Normal">Normal</option>
+            <option value="Alta">Alta</option>
+            <option value="Urgente">Urgente</option>
+            <option value="Baixa">Baixa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nº do Processo / Protocolo</label>
+          <input type="text" id="new-demand-processo" class="form-input" placeholder="Ex: 001/2026 ou SEI nº…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsáveis Técnicos <span class="required">*</span></label>
+          <select class="form-select" id="new-demand-resp" multiple size="6">
+            <option value="">Carregando equipe...</option>
+          </select>
+          <span class="form-hint">Segure Ctrl no computador ou toque em mais de um nome no celular para atribuir engenheiro(s) e/ou arquiteto(s).</span>
+          <span class="form-error-message" id="error-new-demand-resp"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prazo Final <span class="required">*</span></label>
+          <input type="date" id="new-demand-prazo" class="form-input">
+          <span class="form-error-message" id="error-new-demand-prazo"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fase Inicial</label>
+          <select class="form-select" id="new-demand-status">
+            <option value="Triagem">⚪ Triagem Técnica</option>
+            <option value="DFD/ETP">🔵 DFD/ETP</option>
+            <option value="Arquitetura">🟣 Arquitetura</option>
+            <option value="Engenharia">🟡 Engenharia</option>
+            <option value="Orçamento">🟠 Orçamento</option>
+            <option value="Termo/Riscos">📄 Termo/Riscos</option>
+            <option value="Pendente">🟡 Em Execução</option>
+            <option value="Aguardando">🟣 Aguardando Terceiros</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i>Pasta de apoio Google Drive</label>
+          <div class="drive-field-wrap">
+            <i class="fa-brands fa-google-drive"></i>
+            <input type="url" id="new-demand-drive" class="form-input drive-input" placeholder="Opcional: https://drive.google.com/drive/folders/…">
+            <span class="form-error-message" id="error-new-demand-drive"></span>
+          </div>
+          <span class="form-hint">Os anexos técnicos enviados pelos responsáveis ficam salvos no Supabase Storage. Use o Drive apenas como pasta de apoio, quando houver.</span>
+        </div>
+      </div>
+
+      <div class="package-preview" id="new-demand-package-preview">
+        <div class="package-empty"><i class="fa-solid fa-layer-group"></i> Selecione o tipo de demanda para visualizar automaticamente o pacote de entregáveis exigido.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title"><i class="fa-solid fa-user-tie"></i>Dados iniciais da solicitação</div>
+      <div class="alert-banner" style="background: rgba(108,141,250,0.08); border-color: rgba(108,141,250,0.25); margin-bottom: 1rem;">
+        <i class="fa-solid fa-circle-info alert-icon" style="color: var(--accent)"></i>
+        <div class="alert-text">
+          A abertura define categoria, prazo e responsáveis. A documentação é anexada depois pelo técnico responsável.
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full inline-check">
+          <label><input type="checkbox" id="new-demand-structural-change"> Obra teve alteração estrutural ou alteração de solução que exige retorno integral para Arquitetura</label>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Observações gerais</label>
+          <textarea id="new-demand-obs" class="form-textarea" placeholder="Contexto da solicitação, orientação da gestão, urgência, vínculo com convênio/emenda, informações iniciais e observações para os técnicos…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions sticky-actions">
+      <button class="btn btn-ghost" onclick="resetDemandFormMode();showScreen('admin-dashboard')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+      <button class="btn btn-success" id="save-demand-draft-btn" onclick="saveDemand()"><i class="fa-solid fa-floppy-disk"></i> Salvar Rascunho</button>
+      <button class="btn btn-primary" id="save-demand-assign-btn" onclick="saveDemand(true)"><i class="fa-solid fa-paper-plane"></i> Criar e Atribuir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TELA 4 — DETALHE DA DEMANDA
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-demand-detail">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="voltarTelaAnterior()">
+      <i class="fa-solid fa-arrow-left"></i> Voltar
+    </button>
+    <h2 id="detail-title" style="font-family:var(--font-display);font-size:1.2rem;font-weight:500;flex:1">--</h2>
+    <span id="detail-status-badge" class="status-badge s-gray" style="font-size:0.75rem;padding:5px 14px">--</span>
+    <button id="detail-edit-btn" class="btn btn-ghost btn-sm" style="margin-left: 10px;"><i class="fa-solid fa-pen-to-square"></i> Editar Dados</button>
+    <button id="detail-status-btn" class="btn btn-ghost btn-sm" style="margin-left: 10px;"><i class="fa-solid fa-pen-to-square"></i> Alterar Status</button>
+    <button id="detail-print-btn" class="btn btn-ghost btn-sm" style="margin-left: 10px;" onclick="printDemandDossier()"><i class="fa-solid fa-print"></i> Imprimir Dossiê</button>
+    <button id="detail-zip-btn" class="btn btn-ghost btn-sm admin-only" style="margin-left: 10px; color: #3b82f6;" onclick="baixarTodosAnexosEmZip()"><i class="fa-solid fa-file-zipper"></i> Baixar Anexos (ZIP)</button>
+    <button id="detail-delete-btn" class="btn btn-ghost btn-sm btn-danger" style="margin-left: 10px;"><i class="fa-solid fa-trash"></i> Excluir</button>
+  </div>
+
+  <div class="screen-hero compact detail-hero-strip">
+    <div class="hero-copy">
+      <span class="hero-kicker">Dossiê técnico</span>
+      <h1 style="font-size:1.45rem">Anexos e andamento da demanda</h1>
+      <p>DFD e ETP aparecem primeiro; em seguida, os documentos das áreas técnicas.</p>
+    </div>
+  </div>
+
+  <div class="detail-wrap">
+    <div class="detail-main">
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i>
+          <h3>Informações do Projeto</h3>
+        </div>
+        <div class="detail-card-body">
+          <div class="info-row">
+            <span class="info-label">Pacote técnico</span>
+            <span class="info-value"><span id="detail-esp" class="esp-tag">Elétrico</span></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Obra vinculada</span>
+            <span class="info-value"><button class="btn btn-ghost btn-sm" id="detail-work-link" type="button"><i class="fa-solid fa-building-circle-check"></i> Abrir obra</button></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Prioridade</span>
+            <span class="info-value" id="detail-prioridade">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Processo</span>
+            <span class="info-value" id="detail-processo">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Responsáveis atuais</span>
+            <span class="info-value" style="display:flex;align-items:center;gap:8px">
+              <div id="detail-resp-initial" style="width:28px;height:28px;border-radius:50%;background:rgba(108,141,250,0.2);border:1px solid rgba(108,141,250,0.4);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--accent);font-weight:600;flex-shrink:0">MU</div>
+              <span id="detail-resp-name">Murilo</span>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Prazo original</span>
+            <span class="info-value" id="detail-prazo-original">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Prazo atual</span>
+            <span id="detail-prazo-atual" class="info-value"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Pasta Drive</span>
+            <span class="info-value">
+              <a id="detail-drive-link" href="#">
+                <i class="fa-brands fa-google-drive" style="margin-right:4px;color:#4285f4"></i>
+                link será exibido aqui...
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65rem;margin-left:4px"></i>
+              </a>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Criado em</span>
+            <span class="info-value" id="detail-created-info" style="color:var(--text2)">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Observações</span>
+            <span class="info-value" id = "detail-obs"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <i class="fa-solid fa-paperclip" style="color:var(--accent)"></i>
+          <h3>Anexos Técnicos por Categoria</h3>
+          <button class="btn btn-ghost btn-sm btn-danger admin-only" id="detail-structural-btn" style="margin-left:auto; border: 1px solid var(--status-red); color: var(--status-red);" onclick="triggerStructuralReturn()">
+            <i class="fa-solid fa-rotate-left"></i> Retorno Estrutural
+          </button>
+        </div>
+        <div class="detail-card-body">
+          <div id="structural-alert" class="alert-banner" style="display:none; background: rgba(239,68,68,0.1); border-color: var(--status-red); margin-bottom: 1rem;">
+            <i class="fa-solid fa-triangle-exclamation alert-icon" style="color: var(--status-red)"></i>
+            <div class="alert-text">
+              <strong>ATENÇÃO:</strong> Obra com alteração estrutural detectada. A demanda retorna integralmente para a fase de <strong>Arquitetura</strong> para readequação.
+            </div>
+          </div>
+
+          <div class="alert-banner" style="background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); margin-bottom: 1rem;">
+            <i class="fa-solid fa-user-check alert-icon" style="color: var(--status-green)"></i>
+            <div class="alert-text">
+              <strong>Anexos:</strong> o responsável técnico anexa PDFs, DWGs, planilhas e relatórios na categoria correta. Os arquivos enviados ficam salvos no Supabase Storage.
+            </div>
+          </div>
+
+          <div id="detail-attachments-container"></div>
+        </div>
+      </div>
+      </div>
+
+    <!-- SIDEBAR DETALHE -->
+    <div class="detail-sidebar-col">
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <i class="fa-solid fa-timeline" style="color:var(--accent)"></i>
+          <h3>Histórico de Alterações</h3>
+        </div>
+        <div class="detail-card-body" style="padding:0.75rem 1.25rem">
+          <div class="timeline" id="detail-timeline-container">
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <i class="fa-solid fa-bell" style="color:var(--accent)"></i>
+          <h3>Alertas & Avisos</h3>
+          <div class="alerts-list" id="detail-alerts-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TELA 2 — DASHBOARD COLABORADOR
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-colab-dashboard">
+  <div class="screen-hero compact collaborator-hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Área do técnico responsável</span>
+      <h1>Minhas demandas</h1>
+      <p>Acompanhe suas demandas e envie os documentos técnicos correspondentes.</p>
+    </div>
+  </div>
+  <div class="my-demand-header">
+    <div class="my-avatar" id="colab-header-avatar">??</div>
+    <div class="my-info">
+      <h2 id="colab-header-name"></h2>
+      <p style="margin-top:6px">Minhas Demandas Designadas — Acesso Restrito</p>
+    </div>
+    <div class="my-stats">
+      <div class="my-stat">
+        <div class="my-stat-num" id="colab-stat-atrasadas" style="color:var(--status-red)"></div>
+        <div class="my-stat-label">Atrasadas</div>
+      </div>
+      <div class="my-stat">
+        <div class="my-stat-num" id="colab-stat-pendentes" style="color:var(--status-yellow)"></div>
+        <div class="my-stat-label">Em Andamento</div>
+      </div>
+      <div class="my-stat">
+        <div class="my-stat-num" id="colab-stat-concluidas" style="color:var(--status-green)"></div>
+        <div class="my-stat-label">Concluídas</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="colab-alert-banner" class="alert-banner" style="border-color:rgba(239,68,68,0.35); display: none;">
+    <i class="fa-solid fa-triangle-exclamation alert-icon" style="animation:pulse-color 1s infinite"></i>
+    <div class="alert-text" id="colab-alert-text">
+      <strong>Atenção!</strong> Você tem <strong>1 demanda com prazo vencido</strong> e <strong>1 demanda vencendo em menos de 72 horas</strong>. A coordenação já foi notificada.
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Minhas Demandas <span class="section-count" id="colab-demand-count">0 registros</span></div>
+    <!-- O filtro de status foi removido, pois não estava sendo utilizado na renderização da tabela do colaborador. -->
+    <!-- <div class="section-actions"> <select class="filter-select"> <option>Todos os Status</option> <option>Atrasado</option> <option>Pendente</option> <option>Em Revisão</option> <option>Concluído</option> </select> </div> -->
+  </div>
+
+  <div id="colab-table-wrap">
+    <div class="detail-card">
+      <div class="demand-table-wrap">
+        <table class="demand-table">
+          <thead>
+            <tr>
+              <th>DEMANDA / OBRA</th>
+              <th>ESPECIALIDADE</th>
+              <th>PRAZO</th>
+              <th>STATUS</th>
+              <th>ARQUIVOS</th>
+              <th>AÇÃO</th>
+            </tr>
+          </thead>
+          <tbody id="colab-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-content -->
+</div><!-- end main -->
+
+<!-- ═══════════════════════════ MODALS ═══════════════════════════ -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <i class="fa-solid fa-pen-to-square" style="color:var(--accent)"></i>
+      <h3>Alterar Status da Demanda</h3>
+      <button class="btn-icon btn-sm" onclick="closeModal('status-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:1rem">
+        <label class="form-label">Demanda</label>
+        <div id="status-modal-title" style="font-size:0.85rem;color:var(--text1);background:var(--bg3);padding:8px 12px;border-radius:8px;border:1px solid var(--border)">-</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Status Atual</label>
+          <div id="status-modal-current-badge">-</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Novo Status <span class="required">*</span></label>
+          <select class="form-select" id="status-modal-select">
+            <option value="Triagem">⚪ Triagem Técnica</option>
+            <option value="DFD/ETP">🔵 DFD/ETP</option>
+            <option value="Arquitetura">🟣 Arquitetura</option>
+            <option value="Engenharia">🟡 Engenharia</option>
+            <option value="Orçamento">🟠 Orçamento</option>
+            <option value="Termo/Riscos">📄 Termo/Riscos</option>
+            <option value="Pendente">🟡 Pendente / Em Execução</option>
+            <option value="Em Revisão">🔵 Em Revisão</option>
+            <option value="Correção">🟠 Correção</option>
+            <option value="Aguardando">🟣 Aguardando Terceiros</option>
+            <option value="Concluído">✅ Concluído</option>
+            <option value="Atrasado">🔴 Atrasado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:1rem">
+        <label class="form-label">Observação / Motivo (opcional)</label>
+        <textarea id="status-modal-note" class="form-textarea" style="min-height:70px" placeholder="Descreva o motivo da alteração ou adicione um comentário…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('status-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="updateDemandStatus()"><i class="fa-solid fa-check"></i> Confirmar Alteração</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="save-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <i class="fa-solid fa-circle-check" style="color:var(--status-green)"></i>
+      <h3>Demanda registrada</h3>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:2rem">
+      <i class="fa-solid fa-circle-check" style="font-size:2.5rem;color:var(--status-green);display:block;margin-bottom:1rem"></i>
+      <p style="color:var(--text2);font-size:0.85rem">A demanda foi cadastrada e já aparece no painel dos responsáveis definidos.</p>
+    </div>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="btn btn-primary" onclick="closeModal('save-modal');showScreen('admin-dashboard')">Ver Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <i class="fa-solid fa-trash" style="color:var(--status-red)"></i>
+      <h3>Confirmar Exclusão</h3>
+      <button class="btn-icon btn-sm" onclick="closeModal('delete-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:2rem">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size:2.5rem;color:var(--status-red);display:block;margin-bottom:1rem"></i>
+      <p style="color:var(--text2);font-size:0.85rem">Tem certeza que deseja excluir a demanda: <strong id="delete-modal-title" style="color:var(--text1)">[Título da Demanda]</strong>? Esta ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancelar</button>
+      <button class="btn btn-danger" onclick="deleteDemand()"><i class="fa-solid fa-trash"></i> Excluir Permanentemente</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="interatvdd.js"></script>
+<script src="siedu-ui.js"></script>
+</body>
+</html>
